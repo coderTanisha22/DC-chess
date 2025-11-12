@@ -1,0 +1,16 @@
+numpy
+opencv-python
+pillow
+matplotlib
+tensorflow
+scikit-learn
+albumentations
+ultralytics
+fastapi
+uvicorn[standard]
+tqdm
+ultralytics==8.*           # YOLOv8
+torch==2.2.*               # (match your system / GPU) OR let ultralytics pull a compatible wheel
+fastapi uvicorn[standard]  # for simple API
+YOLOv8
+yolo

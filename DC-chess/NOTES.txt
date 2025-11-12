@@ -1,0 +1,6 @@
+Run sequence:
+1) Place Roboflow export in data/roboflow_yolov8/ (data.yaml + images)
+2) Train detector: bash detection/train_detector.sh
+3) After detector best.pt ready, run detection/detect_and_crop.py to crop pieces from boards
+4) Prepare tiles (data/tiles_labeled/<class_name>/) and train classifier: python classifier/train_classifier.py
+5) Preprocess full boards: warp + split tiles (use preprocessing/utils.py) then run inference/full_pipeline.py
