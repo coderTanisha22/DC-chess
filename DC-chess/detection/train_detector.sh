@@ -17,5 +17,5 @@ if [ ! -f "$DATA" ]; then
 fi
 
 echo "Training YOLOv8 detector..."
-yolo task=detect mode=train data="$DATA" model="$MODEL" epochs=$EPOCHS imgsz=$IMGSZ batch=$BATCH project="$PROJECT" name="$NAME"
+python -m ultralytics task=detect mode=train data="$DATA" model="$MODEL" epochs=$EPOCHS imgsz=$IMGSZ batch=$BATCH project="$PROJECT" name="$NAME"
 echo "Done. Check models/detector/$NAME/weights for best.pt"
