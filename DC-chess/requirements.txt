@@ -1,16 +1,26 @@
-numpy
-opencv-python
-pillow
-matplotlib
-tensorflow
-scikit-learn
-albumentations
-ultralytics
+# Core Image Processing
+opencv-python==4.8.1.78
+numpy==1.24.3
+pillow==10.0.1
+matplotlib==3.8.2
+
+# YOLOv8 Object Detection
+ultralytics==8.0.237
+
+# PyTorch (YOLOv8 uses this)
+torch==2.1.1
+torchvision==0.16.1
+
+# Configuration & Utilities
+pyyaml==6.0.1
+python-dotenv==1.0.0
+tqdm
+
+# API (optional)
 fastapi
 uvicorn[standard]
-tqdm
-ultralytics==8.*           # YOLOv8
-torch==2.2.*               # (match your system / GPU) OR let ultralytics pull a compatible wheel
-fastapi uvicorn[standard]  # for simple API
-YOLOv8
-yolo
+
+# Development (optional)
+jupyter==1.0.0
+scikit-learn
+albumentations
