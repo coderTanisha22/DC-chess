@@ -29,8 +29,8 @@ def build_model(num_classes):
 
 def main():
     train_gen = ImageDataGenerator(rescale=1./255, validation_split=0.15,
-                                   rotation_range=10, width_shift_range=0.05, height_shift_range=0.05,
-                                   brightness_range=(0.7,1.3), zoom_range=0.08)
+                                rotation_range=10, width_shift_range=0.05, height_shift_range=0.05,
+                                brightness_range=(0.7,1.3), zoom_range=0.08)
     train_flow = train_gen.flow_from_directory(DATA_DIR, target_size=IMG_SIZE, batch_size=BATCH_SIZE, subset='training', class_mode='categorical')
     val_flow = train_gen.flow_from_directory(DATA_DIR, target_size=IMG_SIZE, batch_size=BATCH_SIZE, subset='validation', class_mode='categorical')
     num_classes = train_flow.num_classes

@@ -22,3 +22,86 @@ models/
 .DS_Store
 Thumbs.db
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+chess/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project-specific
+# Model training outputs
+runs/detect/
+runs/segment/
+runs/classify/
+
+# Dataset (too large)
+data/roboflow_yolov8/
+data/
+
+# Temporary files
+*.pkl
+calibration.pkl
+calibration_result.jpg
+calibration_debug.jpg
+corners_debug.jpg
+*_debug.jpg
+*_temp.*
+
+# Cache files
+.cache/
+*.cache
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+Thumbs.db
+.DS_Store
+*.tmp
+
+# Large video/image files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wav
+*.mp3
+
+# Local testing
+test_output/
+local_results/

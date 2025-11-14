@@ -14,7 +14,6 @@ MODEL_PATH = "models/classifier/piece_classifier.h5"
 CLASS_NAMES_PATH = "models/classifier/class_names.npy"
 
 def board_to_fen(board8x8):
-    # simple mapping; extend as needed
     mapping = {
         'white_king':'K','white_queen':'Q','white_rook':'R','white_bishop':'B','white_knight':'N','white_pawn':'P',
         'black_king':'k','black_queen':'q','black_rook':'r','black_bishop':'b','black_knight':'n','black_pawn':'p','empty':'1'
@@ -57,7 +56,6 @@ def predict_from_warped(warped_path):
     return board, fen
 
 if __name__ == "__main__":
-    # example usage: ensure you have a warped board image saved by preprocessing
     warped_example = "data/processed/IMG_1336_warped_fast.jpg"
     if not os.path.exists(warped_example):
         print("Place a warped board at", warped_example)
