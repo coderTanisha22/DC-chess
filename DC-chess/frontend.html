@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Detection - Sequential Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .upload-section {
+            border: 2px dashed #667eea;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-section:hover {
+            background: #f0f3ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        #image-input {
+            display: none;
+        }
+        
+        .preview-section {
+            display: none;
+        }
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .sequence-info {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            color: #1976d2;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .board-section {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0;
+            width: 100%;
+            aspect-ratio: 1;
+            background: #333;
+            border: 3px solid #1a1a1a;
+        }
+        
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+        }
+        
+        .square.light {
+            background: #f0d9b5;
+        }
+        
+        .square.dark {
+            background: #b58863;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .status-box {
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .piece-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .piece-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .piece-symbol {
+            font-size: 24px;
+        }
+        
+        .confidence {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .move-history {
+            background: #f8f9fa;
+            border-left: 4px solid #764ba2;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .move-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-left: 3px solid #764ba2;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .sequence-counter {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .photo-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .photo-number.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .photo-number.completed {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>♔ Chess Sequential Analysis ♔</h1>
+            <p>Track moves across up to 5 board photos</p>
+        </div>
+        
+        <div class="content">
+            <!-- LEFT PANEL -->
+            <div class="left-panel">
+                <div class="sequence-counter" id="sequenceCounter"></div>
+                
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">
+                        <strong>Click to upload</strong> or drag image
+                    </div>
+                    <div class="upload-text" style="font-size: 12px; color: #999;">
+                        PNG, JPG up to 10MB
+                    </div>
+                    <input type="file" id="image-input" accept="image/*">
+                </div>
+                
+                <div class="preview-section" id="previewSection">
+                    <img id="imagePreview" class="image-preview" alt="Preview">
+                </div>
+                
+                <div class="board-section">
+                    <div class="board" id="board"></div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn-primary" id="detectBtn" onclick="detectPieces()" disabled>🔍 Detect</button>
+                    <button class="btn-secondary" id="nextBtn" onclick="nextPhoto()" disabled style="display:none;">➜ Next Photo</button>
+                    <button class="btn-secondary" id="resetBtn" onclick="resetAll()">🔄 Reset All</button>
+                </div>
+            </div>
+            
+            <!-- RIGHT PANEL -->
+            <div class="right-panel">
+                <div class="status-box" id="statusBox">
+                    Ready to upload first image
+                </div>
+                
+                <div class="info-box">
+                    <h3>
+                        📍 Current Pieces
+                        <span class="badge" id="pieceCount">0</span>
+                    </h3>
+                    <div id="pieceList" class="empty-state">Upload image to see pieces</div>
+                </div>
+                
+                <div class="move-history">
+                    <h3 style="margin-bottom: 15px;">Move History (All Sequences)</h3>
+                    <div id="moveHistoryContent" class="empty-state">No moves detected yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_PHOTOS = 5;
+        let photoSequence = [];
+        let currentPhotoIndex = 0;
+        let moveHistoryByPiece = {};
+        let lastOrientation = "standard";
+        const API_URL = 'http://localhost:5000';
+        
+        const pieceSymbols = {
+            'white_king': '♔', 'white_queen': '♕', 'white_rook': '♖',
+            'white_bishop': '♗', 'white_knight': '♘', 'white_pawn': '♙',
+            'black_king': '♚', 'black_queen': '♛', 'black_rook': '♜',
+            'black_bishop': '♝', 'black_knight': '♞', 'black_pawn': '♟'
+        };
+        
+        function initBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            // Create 8x8 board
+            // Rows go from top (rank 8) to bottom (rank 1)
+            // Cols go from left (file a) to right (file h)
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const sq = document.createElement('div');
+                    
+                    // Calculate square name
+                    const file = String.fromCharCode(97 + col); // a-h
+                    const rank = 8 - row; // 8,7,6,5,4,3,2,1
+                    const squareName = file + rank;
+                    
+                    // Determine color (a1 is dark, h1 is light, a8 is light, h8 is dark)
+                    // Standard chess: (col + row) % 2 === 1 for light squares
+                    const isLight = (col + row) % 2 === 1;
+                    sq.className = `square ${isLight ? 'light' : 'dark'}`;
+                    sq.id = squareName;
+                    
+                    board.appendChild(sq);
+                }
+            }
+        }
+        
+        function updateSequenceCounter() {
+            const counter = document.getElementById('sequenceCounter');
+            counter.innerHTML = '';
+            for (let i = 0; i < MAX_PHOTOS; i++) {
+                const div = document.createElement('div');
+                div.className = 'photo-number';
+                div.textContent = i + 1;
+                if (i < photoSequence.length) {
+                    div.classList.add('completed');
+                }
+                if (i === currentPhotoIndex) {
+                    div.classList.add('active');
+                }
+                counter.appendChild(div);
+            }
+        }
+        
+        document.getElementById('uploadSection').addEventListener('click', () => {
+            document.getElementById('image-input').click();
+        });
+        
+        document.getElementById('uploadSection').addEventListener('dragover', e => {
+            e.preventDefault();
+            document.getElementById('uploadSection').style.background = '#f0f3ff';
+        });
+        
+        document.getElementById('uploadSection').addEventListener('dragleave', () => {
+            document.getElementById('uploadSection').style.background = '';
+        });
+        
+        document.getElementById('uploadSection').addEventListener('drop', e => {
+            e.preventDefault();
+            document.getElementById('uploadSection').style.background = '';
+            if (e.dataTransfer.files.length > 0 && currentPhotoIndex < MAX_PHOTOS) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        document.getElementById('image-input').addEventListener('change', (e) => {
+            if (e.target.files.length > 0 && currentPhotoIndex < MAX_PHOTOS) {
+                handleFile(e.target.files[0]);
+                // Clear the input so same file can be selected again
+                e.target.value = '';
+            }
+        });
+        
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                photoSequence[currentPhotoIndex] = {
+                    file: file,
+                    preview: e.target.result,
+                    detections: null
+                };
+                
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('previewSection').classList.add('active');
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('detectBtn').disabled = false;
+                document.getElementById('statusBox').textContent = `Photo ${currentPhotoIndex + 1} loaded. Click "Detect"`;
+                updateSequenceCounter();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        async function detectPieces() {
+            if (currentPhotoIndex >= photoSequence.length) return;
+            
+            const photo = photoSequence[currentPhotoIndex];
+            document.getElementById('statusBox').textContent = 'Detecting...';
+            document.getElementById('detectBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            
+            const formData = new FormData();
+            formData.append('image', photo.file);
+            
+            try {
+                const res = await fetch(`${API_URL}/detect`, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Store orientation info
+                    lastOrientation = data.orientation;
+                    photoSequence[currentPhotoIndex].detections = data.pieces;
+                    photoSequence[currentPhotoIndex].orientation = data.orientation;
+                    
+                    // Detect moves if there's a previous state
+                    if (currentPhotoIndex > 0 && photoSequence[currentPhotoIndex - 1].detections) {
+                        detectMoves(photoSequence[currentPhotoIndex - 1].detections, data.pieces);
+                    }
+                    
+                    updateBoard(data.pieces, data.orientation);
+                    document.getElementById('pieceCount').textContent = data.count;
+                    displayPieces(data.pieces);
+                    
+                    if (currentPhotoIndex < MAX_PHOTOS - 1) {
+                        document.getElementById('statusBox').textContent = `✓ Photo ${currentPhotoIndex + 1}: ${data.count} pieces. Ready for next photo`;
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        document.getElementById('nextBtn').disabled = false;
+                    } else {
+                        document.getElementById('statusBox').textContent = `✓ Photo ${currentPhotoIndex + 1}: ${data.count} pieces. (Max photos reached)`;
+                        document.getElementById('nextBtn').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('statusBox').textContent = '❌ ' + data.error;
+                    document.getElementById('detectBtn').disabled = false;
+                }
+            } catch (e) {
+                document.getElementById('statusBox').textContent = '❌ Backend not running';
+                document.getElementById('detectBtn').disabled = false;
+            }
+        }
+        
+        function nextPhoto() {
+            if (currentPhotoIndex < MAX_PHOTOS - 1) {
+                currentPhotoIndex++;
+                document.getElementById('previewSection').classList.remove('active');
+                document.getElementById('uploadSection').style.display = '';
+                document.getElementById('detectBtn').disabled = true;
+                document.getElementById('nextBtn').disabled = true;
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('imagePreview').src = '';
+                document.getElementById('statusBox').textContent = `Ready to upload photo ${currentPhotoIndex + 1}`;
+                document.getElementById('image-input').value = '';
+                updateSequenceCounter();
+                initBoard();
+                document.getElementById('pieceCount').textContent = '0';
+                document.getElementById('pieceList').innerHTML = '<div class="empty-state">Upload image to see pieces</div>';
+            }
+        }
+        
+        function updateBoard(pieces, orientation = "standard") {
+            document.querySelectorAll('.piece').forEach(e => e.remove());
+            
+            // NO adjustment - use raw coordinates from backend
+            Object.keys(pieces).forEach(sq => {
+                const piece = pieces[sq];
+                const sqEl = document.getElementById(sq);
+                if (sqEl) {
+                    const p = document.createElement('div');
+                    p.className = 'piece';
+                    p.textContent = pieceSymbols[piece.piece];
+                    p.style.fontSize = '32px';
+                    p.style.cursor = 'pointer';
+                    sqEl.appendChild(p);
+                }
+            });
+        }
+        
+        function displayPieces(pieces) {
+            // Adjust piece positions based on calibration offset
+            const adjustedPieces = {};
+            Object.keys(pieces).forEach(sq => {
+                const file = sq[0]; // a-h
+                const rank = parseInt(sq[1]); // 1-8
+                
+                // Adjust: shift down by 2.5 rows
+                const newRank = Math.max(1, Math.round(rank - 2.5));
+                const adjustedSquare = file + newRank;
+                
+                adjustedPieces[adjustedSquare] = pieces[sq];
+            });
+            
+            const html = Object.keys(adjustedPieces).map(sq => `
+                <div class="piece-item">
+                    <span class="piece-info">
+                        <span class="piece-symbol">${pieceSymbols[adjustedPieces[sq].piece]}</span>
+                        <span>${adjustedPieces[sq].piece}</span>
+                    </span>
+                    <span style="color: #666;">${sq}</span>
+                </div>
+            `).join('');
+            document.getElementById('pieceList').innerHTML = html || '<div class="empty-state">No pieces</div>';
+        }
+        
+        function detectMoves(prevState, currentState) {
+            // Adjust coordinates for both states
+            const adjustCoords = (pieces) => {
+                const adjusted = {};
+                Object.keys(pieces).forEach(sq => {
+                    const file = sq[0];
+                    const rank = parseInt(sq[1]);
+                    const newRank = Math.max(1, Math.round(rank - 2.5));
+                    adjusted[file + newRank] = pieces[sq];
+                });
+                return adjusted;
+            };
+            
+            prevState = adjustCoords(prevState);
+            currentState = adjustCoords(currentState);
+            
+            // Find disappeared and appeared pieces
+            const disappeared = {};
+            for (const [square, piece] of Object.entries(prevState)) {
+                if (!currentState[square]) {
+                    disappeared[square] = piece;
+                }
+            }
+            
+            const appeared = {};
+            for (const [square, piece] of Object.entries(currentState)) {
+                if (!prevState[square]) {
+                    appeared[square] = piece;
+                }
+            }
+            
+            // Match moves
+            for (const [fromSq, fromPiece] of Object.entries(disappeared)) {
+                for (const [toSq, toPiece] of Object.entries(appeared)) {
+                    if (fromPiece.piece === toPiece.piece) {
+                        const key = fromPiece.piece;
+                        if (!moveHistoryByPiece[key]) {
+                            moveHistoryByPiece[key] = [];
+                        }
+                        moveHistoryByPiece[key].push({ from: fromSq, to: toSq });
+                        delete appeared[toSq];
+                        break;
+                    }
+                }
+            }
+            
+            updateMoveHistory();
+        }
+        
+        function updateMoveHistory() {
+            if (Object.keys(moveHistoryByPiece).length === 0) {
+                document.getElementById('moveHistoryContent').innerHTML = '<div class="empty-state">No moves detected</div>';
+                return;
+            }
+            
+            let html = '';
+            Object.keys(moveHistoryByPiece).forEach(piece => {
+                html += `<div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                    <strong>${pieceSymbols[piece]} ${piece}</strong>`;
+                moveHistoryByPiece[piece].forEach((m, i) => {
+                    html += `<div class="move-item">${i+1}. ${m.from} → ${m.to}</div>`;
+                });
+                html += '</div>';
+            });
+            document.getElementById('moveHistoryContent').innerHTML = html;
+        }
+        
+        function resetAll() {
+            photoSequence = [];
+            currentPhotoIndex = 0;
+            moveHistoryByPiece = {};
+            document.getElementById('previewSection').classList.remove('active');
+            document.getElementById('uploadSection').style.display = '';
+            document.getElementById('statusBox').textContent = 'Ready to upload first image';
+            document.getElementById('pieceCount').textContent = '0';
+            document.getElementById('pieceList').innerHTML = '<div class="empty-state">Upload image to see pieces</div>';
+            document.getElementById('moveHistoryContent').innerHTML = '<div class="empty-state">No moves detected yet</div>';
+            document.getElementById('image-input').value = '';
+            document.getElementById('detectBtn').disabled = true;
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('imagePreview').src = '';
+            initBoard();
+            updateSequenceCounter();
+        }
+        
+        initBoard();
+        updateSequenceCounter();
+    </script>
+</body>
+</html>
