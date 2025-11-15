@@ -34,11 +34,11 @@ for img_name in images:
     print(f"   Mean brightness: {mean_brightness:.1f} (0=black, 255=white)")
     
     if mean_brightness > 200:
-        print(f"   ⚠️  Image is very bright/empty!")
+        print(f" Image is very bright/empty!")
     elif mean_brightness < 50:
-        print(f"   ⚠️  Image is very dark!")
+        print(f" Image is very dark!")
     else:
-        print(f"   ✓ Good brightness")
+        print(f"✓ Good brightness")
 
 print("\n" + "="*60)
 print("RECOMMENDATION:")

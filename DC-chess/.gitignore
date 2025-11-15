@@ -9,7 +9,6 @@ venv/
 *.sqlite3
 
 # Data and models (do not commit large binaries)
-data/
 models/
 *.h5
 *.pt
