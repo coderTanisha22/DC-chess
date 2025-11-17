@@ -12,7 +12,7 @@ import os
 
 load_dotenv()
 
-image_path = os.getenv('INPUT_IMAGE_PATH')
+image_path = os.getenv('IMAGE_PATH')
 
 corners = []
 image_display = None

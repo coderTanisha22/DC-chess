@@ -1,70 +1,58 @@
 """
-retrain_model.py
-Properly retrain YOLOv8 model for chess piece detection
+YOLOv8 Training Script for DC-Chess (Windows + GPU safe)
 """
 
 import os
 from ultralytics import YOLO
+from ultralytics.utils import SETTINGS
 
-print("\n" + "="*60)
-print("RETRAINING YOLOV8 FOR CHESS PIECE DETECTION")
-print("="*60)
+# ---------------------------------------------------------
+#  FIX: Force disable Ultralytics dataset override
+# ---------------------------------------------------------
+SETTINGS["datasets_dir"] = None
 
-# Check data.yaml exists
-data_yaml = "data/roboflow_yolov8/data.yaml"
 
-if not os.path.exists(data_yaml):
-    print(f"\n❌ Dataset config not found: {data_yaml}")
-    exit(1)
+# ---------------------------------------------------------
+#  FIX: Ensure correct working directory
+# ---------------------------------------------------------
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+print(f"[INFO] Using project root: {PROJECT_ROOT}")
 
-print(f"\n✓ Dataset: {data_yaml}")
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "roboflow_yolov8", "data.yaml")
+print(f"[INFO] Using dataset config: {DATA_PATH}")
 
-# Load base model
-print("\n📦 Loading base YOLOv8 model...")
-model = YOLO('yolov8m.pt')  # Medium model (good balance)
-print("✓ Model loaded")
+# ---------------------------------------------------------
+#  Training Function
+# ---------------------------------------------------------
+def train_yolo():
+    print("\n================ YOLOv8 Training (GPU) ================\n")
 
-# Train
-print("\n🚀 Starting training...")
-print("   This may take 5-15 minutes depending on GPU\n")
+    # Load model
+    model = YOLO("yolov8n.pt")
 
-results = model.train(
-    data=data_yaml,
-    epochs=30,                     # 50 epochs (CPU training is slower)
-    imgsz=416,                     # Smaller image size for CPU
-    batch=4,                       # Small batch size for CPU
-    patience=15,                   # Early stopping patience
-    device='cpu',                  # Use CPU
-    save=True,                     # Save checkpoints
-    cache=False,                   # Don't cache (saves RAM on CPU)
-    verbose=True,                  # Verbose output
-    project='runs/detect',         # Save to runs/detect
-    name='train',                  # Experiment name
-    exist_ok=True,                 # Overwrite existing
-    optimizer='SGD',               # SGD optimizer
-    lr0=0.01,                      # Initial learning rate
-    momentum=0.937,                # Momentum
-    weight_decay=0.0005,           # Weight decay
-    augment=True,                  # Data augmentation
-    workers=2,                     # Fewer workers for CPU
-)
+    print("✔ GPU Available:", model.device)
+    
+    # Train
+    results = model.train(
+        data=DATA_PATH,
+        epochs=50,
+        imgsz=640,
+        batch=16,
+        device=0,          # GPU 0
+        workers=0,         # IMPORTANT for Windows
+        cache=False,       # Avoid Windows caching issues
+        optimizer="AdamW",
+        project="runs/detect",
+        name="train_50epochs",
+        exist_ok=True
+    )
 
-print("\n" + "="*60)
-print("TRAINING COMPLETE!")
-print("="*60)
+    print("\n================ Training Completed ================\n")
+    return results
 
-# Print results
-print("\nResults saved to:")
-print("  - runs/detect/train/weights/best.pt (best model)")
-print("  - runs/detect/train/results.csv (metrics)")
-print("  - runs/detect/train/results.png (plots)")
 
-# Get metrics
-if results:
-    print("\nFinal Metrics:")
-    if hasattr(results, 'results_dict'):
-        metrics = results.results_dict
-        for key, value in metrics.items():
-            print(f"  {key}: {value}")
-
-print("\n✅ Next: Run simple_move_test.py to test detection!")
+# ---------------------------------------------------------
+#  Windows Multiprocessing Guard
+# ---------------------------------------------------------
+if __name__ == "__main__":
+    train_yolo()
