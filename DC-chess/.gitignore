@@ -9,10 +9,7 @@ venv/
 *.sqlite3
 
 # Data and models (do not commit large binaries)
-data/
-models/
 *.h5
-*.pt
 *.onnx
 
 # Jupyter checkpoints
@@ -66,10 +63,13 @@ wheels/
 runs/detect/
 runs/segment/
 runs/classify/
+runs/dataset/   
 
 # Dataset (too large)
 data/roboflow_yolov8/
-data/
+
+!models/
+!models/*.pt
 
 # Temporary files
 *.pkl

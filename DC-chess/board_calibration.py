@@ -158,11 +158,23 @@ if __name__ == "__main__":
     image_display = image_original.copy()
     
     # Resize if too large
+    # Resize image to fit on screen dynamically
     height, width = image_original.shape[:2]
-    if height > 1200:
-        scale = 1200 / height
-        image_original = cv2.resize(image_original, (int(width*scale), int(height*scale)))
+
+    screen_height = 900   # Good safe height for Windows
+    screen_width = 1600   # Adjust if needed
+
+    scale_h = screen_height / height
+    scale_w = screen_width / width
+    scale = min(scale_h, scale_w, 1.0)  # Never upscale, only downscale
+
+    if scale < 1.0:
+        image_original = cv2.resize(image_original, (int(width * scale), int(height * scale)))
         image_display = image_original.copy()
+        print(f"[INFO] Image scaled down by factor {scale:.3f}")
+    else:
+        print("[INFO] No scaling applied")
+
     
     print("\n" + "="*60)
     print("INSTRUCTIONS:")

@@ -27,7 +27,7 @@ def load_resources():
     print(f"✓ Calibration loaded (board size: {calibration['board_size']})")
     
     print("Loading YOLOv8 model...")
-    model = YOLO('runs/detect/train/weights/best.pt')
+    model = YOLO('runs/detect/train_50epochs/weights/best.pt')
     print("✓ Model loaded")
 
 def bbox_to_square(bbox, square_map):

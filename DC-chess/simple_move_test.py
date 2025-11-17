@@ -174,7 +174,7 @@ def main():
     
     # Load model
     print("\n Loading YOLOv8 model...")
-    model_path = "runs/detect/train/weights/best.pt"
+    model_path = "runs/detect/train_50epochs/weights/best.pt"
     if not os.path.exists(model_path):
         print(f"Model not found: {model_path}")
         return
