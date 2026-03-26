@@ -171,7 +171,6 @@ Example response shape:
 	"count": 27,
 	"orientation": "standard"
 }
-``
 
 ## Future Enhancements
 
